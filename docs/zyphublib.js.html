@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>zyphublib.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Zyp.html">Zyp</a><ul class='methods'><li data-type='method'><a href="Zyp.html#getInbox">getInbox</a></li><li data-type='method'><a href="Zyp.html#login">login</a></li><li data-type='method'><a href="Zyp.html#logout">logout</a></li><li data-type='method'><a href="Zyp.html#nameProfile">nameProfile</a></li><li data-type='method'><a href="Zyp.html#newMsg">newMsg</a></li><li data-type='method'><a href="Zyp.html#on">on</a></li><li data-type='method'><a href="Zyp.html#updateMsg">updateMsg</a></li></ul></li><li><a href="Zyp.Groups.html">Groups</a><ul class='methods'><li data-type='method'><a href="Zyp.Groups.html#create">create</a></li><li data-type='method'><a href="Zyp.Groups.html#get">get</a></li><li data-type='method'><a href="Zyp.Groups.html#update">update</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">zyphublib.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+import Utils                    from './utils/utils';
+import AuthAPI                  from './utils/AuthAPI';
+import APIUtils                 from './utils/APIUtils';
+import Helpers                  from './helpers';
+import WS                       from './websockets/websockets';
+import Groups                   from './groups';
+
+var Zyp = (function() {
+
+    var _currentUser = null;
+    var _inbox = [];
+    var _events = null;
+    var _apiKey = null;
+    var _loggedIn = false;
+
+    var _handleWebsocketNotifications = function(data) {
+        if (data === 'fail') {
+            return;
+        }
+
+        var notification = JSON.parse(data);
+
+        var alertIncommingMessage = (notification.type !== 'UPDATE_EVENT') &amp;&amp; (notification.intendedRecipient !== notification.originator);
+
+        if (_currentUser !== notification.intendedRecipient) {
+            var err = 'Error: got incorrect notification for: ' + notification.intendedRecipient + ' I am ' + _currentUser;
+            WS.emit('error', err);
+            return;
+        }
+
+        // get the conversation list for the indicated recipient
+        let conv = _inbox;
+
+        // if there isn't one create the array, and add this notification as a complete conversation
+        if (!conv) {
+            conv = [];
+            conv.push(notification);
+        }
+        else {
+
+            // find the effected conversation
+            var found = false;
+            for (var i = 0; i &lt; conv.length; i++) {
+                if (notification.id === conv[i].id) {
+                    found = true;
+                    Utils.extend(conv[i], notification);
+                    break;
+                }
+            }
+            if (!found) {
+                // new conversation or update to one we rejected?
+                if (notification.type === 'NEW') {
+                    conv.push(notification);
+                }
+                else {
+                    return;
+                }
+            }
+        }
+        conv = Helpers.removeClosed(conv);
+        _inbox = Utils.sortByModifiedDate(conv);
+
+        var data = {
+            alert: alertIncommingMessage,
+            inbox: _inbox
+        };
+
+        WS.emit('inbox', data);
+    };
+
+    var _loginCheck = function() {
+        if (!_loggedIn) {
+            var error = 'Not logged in';
+            WS.emit('error', err);
+            return false;
+        } else {
+            return true;
+        }
+    };
+
+    var _verifyAction = function(action, allowedActions) {
+        if (allowedActions.indexOf(action) != -1) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    /*
+     * ZypHub Module
+     * @public
+     * @module Zyp
+     */
+
+    /**
+     * Instantiate ZypHub
+     *
+     * @constructor
+     * @name Zyp
+     * @param {string} [apiKey] An enterprose API Key for login
+     *
+     * @example
+     * let zyp = new Zyp();
+     *
+     * @example
+     * let zyp = new Zyp(MY_ENTERPRISE_API_KEY);
+     */
+    function Zyp(apiKey) {
+        this._apiKey = apiKey;
+        /**
+         * @memberOf Zyp
+         * @name groups Group APIs
+         */
+        this.groups = new Groups;
+    };
+
+    /**
+     * Sets an application handers for ZypHub Events.
+     *
+     * @memberof Zyp
+     * @param {string} type The event to be handled. Valid events are: login, error, websocket
+     * @param {EventHandlerCallback} callback The handler function
+     * @param {Object} context Optional A context object that will be also passed to the hander with the event data
+     */
+    Zyp.prototype.on = function(type, callback, ctx) {
+        if (!_events) {
+            _events = {};
+            WS.init(_events);
+        }
+        _events[type] = {cb:callback, context: ctx};
+    };
+    /**
+     * This is the signature of the event callback function
+     * @callback EventHandlerCallback
+     * @param {Object} data Event type specific data
+     * @param {Object} context Optional either the static context object configured with the handler or an event type specific context data
+     */
+
+    /**
+     * Login a user to ZypHub
+     * @memberof Zyp
+     * @param userName A unique identifier for the user
+     * @param [password] Required if not using an enterprise API Key
+     *
+     * @emits login Authenthicated user object
+     */
+    Zyp.prototype.login = function(userName, password) {
+        // API Key Login?
+        if (_apiKey) {
+            var user = {
+                id: userName,
+                key: _apiKey
+            };
+
+            AuthAPI.loginByKey(user).then(user => {
+                _currentUser = user;
+                WS.connect(user, _handleWebsocketNotifications);
+                WS.emit('login',user.profile[0]);
+                _loggedIn = true;
+                console.log(user);
+            }).catch(err => {
+                if (!err) {
+                    err = 'Login Failed';
+                }
+                WS.emit('error', err);
+                _loggedIn = false;
+                console.log(err);
+            });
+        } else {
+            if (userName.indexOf('@') === -1) {
+                // coerce the username into the form of an email address
+                // TODO: make the email domain configurable
+                userName+='@maidez.cpo';
+            }
+            var user = {
+                email: userName,
+                password: password
+            };
+
+            AuthAPI.login(user).then(user => {
+                _currentUser = user;
+                WS.connect(user, _handleWebsocketNotifications);
+                WS.emit('login',user.profile[0]);
+                _loggedIn = true;
+                console.log(user);
+            }).catch(err => {
+                if (!err) {
+                    err = 'Login Failed';
+                }
+                WS.emit('error', err);
+                _loggedIn = false;
+                console.log(err);
+            });
+        }
+    };
+
+    /**
+     * Logout of a ZypHub Session
+     *
+     * @memberof Zyp
+     * @return {Boolean} Logout was successful
+     */
+    Zyp.prototype.logout = function() {
+        if (!_loginCheck()) {
+            return false;
+        }
+        _loggedIn = false;
+        WS.close(this.handleWebsocketNotifications);
+        return true;
+    };
+
+    /**
+     * Fetch a users inbox
+     * The user must be logged in otherwise an error will be emitted
+     *
+     * @memberof Zyp
+     * @return {Boolean} returns if the request was successfully made, a successful request may still result in an error being emitted
+     *
+     * @emits inbox Complete inbox for the current authenthicated user
+     */
+    Zyp.prototype.getInbox = function() {
+        if (!_loginCheck()) {
+            return false;
+        }
+
+        APIUtils.get('conversations').then(cs => {
+            _inbox = this.sortByModifiedDate(cs);
+            WS.emit('inbox', _inbox);
+        }).catch(err => {
+            var error = 'Inbox fetch failed\n' + err;
+            WS.emit('error', err);
+        });
+        return true;
+    };
+
+    /**
+     * Send a new message
+     * @memberof Zyp
+     *
+     * @param {Object} msg The message to be sent
+     * @param {string} msg.pattern The message pattern. One of FCFS, STD, FYI
+     * @param {Array} msg.members Array of identifiers to send the message to
+     * @param {string} msg.content The body of the message
+     * @param {number} [msg.maxAccepts] If the pattern if FCFS this sets the number of 'Accepts' to consider the message complete, if the pattern is FCFS and this parameter is not specified it will default to 1
+     *
+     * @return {boolean} returns if the request was successfully made, a successful request may still result in an error being emitted. A successful message will emit the messages id on the 'new' topic
+     */
+    Zyp.prototype.newMsg = function(msg) {
+        if (!_loginCheck()) {
+            return false;
+        }
+
+        var message = {
+            pattern: msg.pattern,
+            members: msg.members,
+            content: {
+                text: msg.content
+            },
+            priority: "0",
+            maxAccepts: msg.maxAccepts ? msg.maxAccepts : 1
+        };
+
+        APIUtils.post('conversations', message).then(c => {
+
+            if (c.conversationId) {
+                WS.emit('new', c);
+            }
+        }).catch(err => {
+            var error = 'Message creation failed\n' + err;
+            WS.emit('error', err);
+        });
+    };
+
+    /**
+     * Update an existing message
+     * @memberof Zyp
+     *
+     * @param {Object} m The message
+     * @param {string} action The action to perform on the message. Must be one of the allowed actions in the message.
+     * @param {string} [data] Action specific data.
+     * If the Action is 'FORWARD' then data must contain the UUID of the member the message is being forwarded to
+     * If the Action is 'DELEGATE' then the data must contain the UUID of the member the message is being delagated to
+     *
+     * @return {boolean} returns if the request was successfully made, a successful request may still result in an error being emitted. A successful message will emit the messages id on the 'update' topic
+     */
+    Zyp.prototype.updateMsg = function(m, action, data) {
+        if (!_loginCheck()) {
+            return false;
+        }
+        if (!_verifyAction(action, m.allowableActions)) {
+            var err = 'Error: Action ' + action + ' is not allowed on message ' + m.id;
+            WS.emit('error', err);
+            return false;
+        }
+
+        APIUtils.put('conversations/' + m.id + '/' + action, data).then(cid => {
+            WS.emit('update', cid);
+        }).catch(err => {
+            var error = 'Message update failed\n' + err;
+            WS.emit('error', err);
+        });
+    };
+
+    /**
+     * Add a name to a users ZypHub profile
+     *
+     * @memberof Zyp
+     *
+     * @param {string} first First name
+     * @param {string} last Last name
+     *
+     * @return {boolean} returns if the request was successfully made, a successful request may still result in an error being emitted on the error topic
+     */
+    Zyp.prototype.nameProfile = function(first, last) {
+        var name = {
+            firstName: first,
+            lastName: last
+        };
+        APIUtils.post('users/register', names).then(user => {
+            this.setUser(user);
+            AsyncStorage.setItem('mduser', JSON.stringify(user) );
+        }).catch(err => {
+            var error = 'nameProfile('+ first + ',' + last+') failed: ' + err;
+            WS.emit('error', err);
+        });
+    };
+
+    return Zyp;
+
+})();
+
+if (typeof module === 'object' &amp;&amp; typeof module.exports === 'object') {
+    module.exports = Zyp;
+}
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jan 15 2017 15:40:08 GMT-0600 (CST) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

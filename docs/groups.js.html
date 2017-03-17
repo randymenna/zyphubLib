@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>groups.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Zyp.html">Zyp</a><ul class='methods'><li data-type='method'><a href="Zyp.html#getInbox">getInbox</a></li><li data-type='method'><a href="Zyp.html#login">login</a></li><li data-type='method'><a href="Zyp.html#logout">logout</a></li><li data-type='method'><a href="Zyp.html#nameProfile">nameProfile</a></li><li data-type='method'><a href="Zyp.html#newMsg">newMsg</a></li><li data-type='method'><a href="Zyp.html#on">on</a></li><li data-type='method'><a href="Zyp.html#updateMsg">updateMsg</a></li></ul></li><li><a href="Zyp.Groups.html">Groups</a><ul class='methods'><li data-type='method'><a href="Zyp.Groups.html#create">create</a></li><li data-type='method'><a href="Zyp.Groups.html#get">get</a></li><li data-type='method'><a href="Zyp.Groups.html#update">update</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">groups.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+import Utils                    from './utils/utils';
+import AuthAPI                  from './utils/AuthAPI';
+import APIUtils                 from './utils/APIUtils';
+import Helpers                  from './helpers';
+import WS                       from './websockets/websockets';
+
+
+var Groups = (function() {
+
+    /**
+     * Group APIS
+     *
+     * @name Zyp.Groups
+     * @access protected
+     * @constructor
+     *
+     */
+    function Groups(callback, error) {
+        this._callback = callback;
+        this._error = error;
+    };
+
+    /**
+     * Fetch a domains groups
+     * The user must be logged in otherwise an error will be emitted
+     *
+     * @function Zyp.Groups#get
+     * @memberOf Zyp.Groups
+     * @return {Boolean} returns if the request was successfully made, a successful request may still result in an error being emitted.
+     * @emit group:list A list of group objects
+     */
+    Groups.prototype.get = function() {
+        if (!_loginCheck()) {
+            return false;
+        }
+
+        APIUtils.get('groups').then(groups => {
+            this._callback(groups);
+        }).catch(err => {
+            var error = 'Groups fetch failed\n' + err;
+            this._error(error);
+        });
+        return true;
+    };
+
+    /**
+     * Create a new Group
+     *
+     * @param {Object} group Group object
+     *
+     * @function Zyp.Groups#create
+     * @memberof Zyp.Groups
+     * @return {boolean} returns if the request was successfully made, a successful request may still result in an error being emitted.
+     * A successful group creation will be returned on the event groups the messages id on the 'new' topic
+     * @emit group:id The GUID for the new group
+     */
+    Groups.prototype.create = function(msg) {
+        if (!_loginCheck()) {
+            return false;
+        }
+
+        var message = {
+            pattern: msg.pattern,
+            members: msg.members,
+            content: {
+                text: msg.content
+            },
+            priority: "0",
+            maxAccepts: msg.maxAccepts ? msg.maxAccepts : 1
+        };
+
+        APIUtils.post('groups', message).then(c => {
+
+            if (c.conversationId) {
+                WS.emit('group:id', c);
+            }
+        }).catch(err => {
+            var error = 'Message creation failed\n' + err;
+            WS.emit('error', err);
+        });
+    };
+
+    /**
+     * Update an existing Group
+     *
+     * @function Zyp.Groups#update
+     * @memberof Zyp.Groups
+     *
+     * @param {Object} m The message
+     * @param {string} action The action to perform on the message. Must be one of the allowed actions in the message.
+     * @param {string} [data] Action specific data.
+     * If the Action is 'FORWARD' then data must contain the UUID of the member the message is being forwarded to
+     * If the Action is 'DELEGATE' then the data must contain the UUID of the member the message is being delagated to
+     *
+     * @return {boolean} returns if the request was successfully made, a successful request may still result in an error being emitted. A successful message will emit the messages id on the 'update' topic
+     * @emit group:list A list of group objects
+     */
+    Groups.prototype.update = function(m, action, data) {
+        if (!_loginCheck()) {
+            return false;
+        }
+        if (!_verifyAction(action, m.allowableActions)) {
+            var err = 'Error: Action ' + action + ' is not allowed on message ' + m.id;
+            WS.emit('error', err);
+            return false;
+        }
+
+        APIUtils.put('conversations/' + m.id + '/' + action, data).then(cid => {
+            WS.emit('update', cid);
+        }).catch(err => {
+            var error = 'Message update failed\n' + err;
+            WS.emit('error', err);
+        });
+    };
+
+    return Groups;
+
+})();
+
+export default Groups;
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jan 15 2017 15:40:08 GMT-0600 (CST) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

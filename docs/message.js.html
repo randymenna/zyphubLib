@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: message.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: message.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Actions
+ * @enum {string}
+ */
+var Actions = {
+    /** reply to the message */
+    REPLY:'REPLY',
+    /** terminate the message */
+    CLOSE:'CLOSE',
+    /** drop off the message */
+    LEAVE:'LEAVE',
+    ACCEPT:'ACCEPT',
+    REJECT:'REJECT',
+    OK:'OK',
+    /** add a member to the message */
+    FORWARD:'FORWARD',
+    /** substitute another member for yourself in the message */
+    DELEGATE:'DELEGATE'
+};
+
+/**
+ * Message Object
+ * @typedef {Object} Message
+ * @property {strind} id    The message UUID
+ * @property {string} originator    The ZypHub UUID of the entity that sent the last update to this message
+ * @property {Object} header    The message header
+ * @property {string} header.owner  The ZypHub UUID of the message owner
+ * @property {string} header.originalID The enterprise UUID of the message owner
+ * @property {Object} time  Message timestamps
+ * @property {string} time.created   The UTC timestamp of when the message was created
+ * @property {string} time.modified The UTC timestamp of when the message was last modified
+ * @property {string[]} allowableActions    Actions that can be passed to Zyp.update for this message
+ * @property {Object} state The message state
+ * @property {number} state.startMemberCount    The number of members in the message at time of creation
+ * @property {number} state.curMemberCount      The current number of members in the message
+ * @property {number} state.leaves  The number of members that have left the message
+ * @property {number} state.delegates   The number of members that have delegated the message
+ * @property {number} state.forwards    The number of members that have been added to the message by forwarding
+ * @property {number} state.oks The number of members that have acknowledged the message (FYI pattern only)
+ * @property {number} state.rejects The number of members that have rejected the message (FCFS pattern only)
+ * @property {number} state.accepts The number of members that have accepted the message (FCFS pattern only)
+ * @property {number} state.maxAccepts  The number of accepts allowed on the message (FCFS pattern only)
+ * @property {boolean} state.open   Is the message still open?
+ * @property {Object[]} state.members Array of members state in the conversation
+ * @property {Object} state.members.member  Member information
+ * @property {string} state.members.member._id  The ZypHub UUID of the member
+ * @property {string} state.members.member.originalId   The enterprise UUID of the member
+ * @property {string} state.members.eventTime    The UTC timestamp of the last event this member posted to the message
+ * @property {string} state.members.lastEvent    The last event this member posted to the message
+ * @property {Object} content   Message content
+ * @property {string} content.message   The text of the original message
+ * @property {Object[]} content.replies Reply content to the original message
+ * @property {Object} content.replies.origin    The member that created this reply
+ * @property {string} content.replies.origin._id    The ZypHub UUID of the member
+ * @property {string} content.replies.origin.originalId The enterprise UUID of the member
+ * @property {string} content.replies.content   The text of the reply
+ * @property {string} content.replies._id   The UUID of the reply
+ * @property {string} content.replies.created   The UTC timestamp of when the reply was created
+ * @property {Object} envelope  The message envelope
+ * @property {string} envelope.pattern  The message pattern
+ * @property {string} envelope.latestMember The ZypHub UUID of the last member to modify this message
+ * @property {Object} envelope.origin    The message creator
+ * @property {string} envelope.origin._id    The ZypHub UUID of the member
+ * @property {string} envelope.origin.originalId The enterprise UUID of the member
+ * @property {number} envelope.priority The priority of the message (N/A for now)
+ * @property {Object[]} envelope.context    The context address of the message
+ * @property {Object[]} envelope.members    The current members in the message
+ * @property {string} envelope.members._id  The ZypHub UUID of the member
+ * @property {string} envelope.members.originalId   The enterprise UUID of the member
+ */
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Zyp.html">Zyp</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Actions">Actions</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Jan 12 2017 22:12:28 GMT-0600 (CST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<h1 class="page-title">RTM</h1>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="Zyp.html">Zyp</a>.</span>
+        
+        RTM
+        </h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    <h4 class="name " id="RTM">new RTM<span class="signature">()</span><span class="type-signature"></span>
+
+    
+      <span class="member-attr protected">protected</span>
+    
+
+    </h4>
+
+    
+
+
+
+<div class="description">
+    Instantiate ZypHub
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h2 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name " id="getInbox">getInbox<span class="signature">()</span><span class="type-signature"> &rarr;  Boolean</span>
+
+    
+
+    </h4>
+
+    
+
+
+
+<div class="description">
+    Fetch a users inbox
+The user must be logged in otherwise an error will be emitted
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<h5>Fires:</h5>
+<ul>
+    <li>event:inbox Complete inbox for the current authenthicated user</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name " id="create">create<span class="signature">(msg)</span><span class="type-signature"> &rarr;  boolean</span>
+
+    
+
+    </h4>
+
+    
+
+
+
+<div class="description">
+    Send a new message
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Arguments:</h5>
+    
+
+<ol>
+  
+  <li>
+     <code>msg</code> <code>(<span class="param-type">Object</span>)</code>&nbsp;&nbspThe message to be sent
+     
+        <h6>Properties</h6>
+		
+
+<ol>
+  
+  <li>
+     <code>pattern</code> <code>(<span class="param-type">string</span>)</code>&nbsp;&nbspThe message pattern. One of FCFS, STD, FYI
+     
+  </li>
+  
+  <li>
+     <code>members</code> <code>(<span class="param-type">Array</span>)</code>&nbsp;&nbspArray of identifiers to send the message to
+     
+  </li>
+  
+  <li>
+     <code>content</code> <code>(<span class="param-type">string</span>)</code>&nbsp;&nbspThe body of the message
+     
+  </li>
+  
+  <li>
+     <code>[maxAccepts]</code> <code>(<span class="param-type">number</span>)</code>&nbsp;&nbspIf the pattern if FCFS this sets the number of 'Accepts' to consider the message complete, if the pattern is FCFS and this parameter is not specified it will default to 1
+     
+  </li>
+  
+</ol>
+
+     
+  </li>
+  
+</ol>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name " id="update">update<span class="signature">(m, action, data<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr;  boolean</span>
+
+    
+
+    </h4>
+
+    
+
+
+
+<div class="description">
+    Update an existing message
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Arguments:</h5>
+    
+
+<ol>
+  
+  <li>
+     <code>m</code> <code>(<span class="param-type">Object</span>)</code>&nbsp;&nbspThe message
+     
+  </li>
+  
+  <li>
+     <code>action</code> <code>(<span class="param-type">string</span>)</code>&nbsp;&nbspThe action to perform on the message. Must be one of the allowed actions in the message.
+     
+  </li>
+  
+  <li>
+     <code>[data]</code> <code>(<span class="param-type">string</span>)</code>&nbsp;&nbspAction specific data.
+If the Action is 'FORWARD' then data must contain the UUID of the member the message is being forwarded to
+If the Action is 'DELEGATE' then the data must contain the UUID of the member the message is being delagated to
+     
+  </li>
+  
+</ol>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+<div class="forScrollToTop"></div>

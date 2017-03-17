@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Home - Postman Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Message.html">Message</a><ul class='methods'><li data-type='method'><a href="Message.html#getContent">getContent</a></li><li data-type='method'><a href="Message.html#getEnvelope">getEnvelope</a></li><li data-type='method'><a href="Message.html#getId">getId</a></li><li data-type='method'><a href="Message.html#getMessage">getMessage</a></li><li data-type='method'><a href="Message.html#getParticipants">getParticipants</a></li><li data-type='method'><a href="Message.html#getState">getState</a></li><li data-type='method'><a href="Message.html#getTimes">getTimes</a></li><li data-type='method'><a href="Message.html#update">update</a></li></ul></li><li><a href="Zyp.html">Zyp</a><ul class='methods'><li data-type='method'><a href="Zyp.html#.getEnterpriseUsers">getEnterpriseUsers</a></li><li data-type='method'><a href="Zyp.html#getCachedMessageList">getCachedMessageList</a></li><li data-type='method'><a href="Zyp.html#getMessageList">getMessageList</a></li><li data-type='method'><a href="Zyp.html#loginByEmail">loginByEmail</a></li><li data-type='method'><a href="Zyp.html#loginByEnterpriseToken">loginByEnterpriseToken</a></li><li data-type='method'><a href="Zyp.html#loginByUserToken">loginByUserToken</a></li><li data-type='method'><a href="Zyp.html#logout">logout</a></li><li data-type='method'><a href="Zyp.html#newMessage">newMessage</a></li><li data-type='method'><a href="Zyp.html#onError">onError</a></li><li data-type='method'><a href="Zyp.html#onMessageList">onMessageList</a></li><li data-type='method'><a href="Zyp.html#onNotification">onNotification</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="global.html#event:EnterpriseUsers">EnterpriseUsers</a></li><li><a href="global.html#event:LoginNotification">LoginNotification</a></li><li><a href="global.html#event:LogoutNotification">LogoutNotification</a></li><li><a href="global.html#event:MessageListUpdate">MessageListUpdate</a></li><li><a href="global.html#event:MessageNotification">MessageNotification</a></li><li><a href="global.html#event:WebSocketNotification">WebSocketNotification</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+
+    
+
+
+
+    
+
+
+
+
+
+
+
+
+
+    
+
+
+    <section class="readme">
+        <article><h1>zypHubLib</h1><p>Javascript Library for ZypHub messaging</p>
+<h1>Message Patterns</h1><p>Message patterns are built-in workflows that simplify communication tasks.  Patterns define the type of action that the message originator and the message recipient can take on a particular message, and the system behavior on the message for any specific action.</p>
+<p>Within the ConversePoint system these are the superset of message actions.</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Meaning</th>
+<th>System Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read</td>
+<td>Mark the conversation as read</td>
+<td>Conversation originator is notified of action</td>
+</tr>
+<tr>
+<td>Reply</td>
+<td>Add content to the message thread</td>
+<td>All conversation participants receive the updated content</td>
+</tr>
+<tr>
+<td>Close</td>
+<td>Terminate the conversation</td>
+<td>Conversation is removed from all participants active queue</td>
+</tr>
+<tr>
+<td>Leave</td>
+<td>Stop participating in a conversation</td>
+<td>Conversation is removed from the participants queue, remaining participants are notified of this action.</td>
+</tr>
+<tr>
+<td>Forward</td>
+<td>Add a new participant to the conversation</td>
+<td>New participant is added to the conversation, all participants are notified of the addition</td>
+</tr>
+<tr>
+<td>Delegate</td>
+<td>Substitute one participant for another</td>
+<td>Conversation is removed from participants active queue, added to new participants queue, all remaining participants are notified of change.</td>
+</tr>
+<tr>
+<td>Accept</td>
+<td>Agree to participate in conversation</td>
+<td>Conversation originator is notified of action, if agreement limit is reached Conversation is removed from other participants active queue.</td>
+</tr>
+<tr>
+<td>Reject</td>
+<td>Reject participation in conversation</td>
+<td>Conversation originator is notified of action, Conversation is removed from participants active queue.</td>
+</tr>
+<tr>
+<td>OK</td>
+<td>Acknowledge receipt of conversation</td>
+<td>Conversation originator is notified of action, Conversation is removed from participants active queue.</td>
+</tr>
+</tbody>
+</table>
+<p>These are the currently supported message patterns:</p>
+<ul>
+<li><p><strong>STANDARD</strong></p>
+<p>One to one, one to many messaging. Similar to email/text messaging. Used for request/reply communications.</p>
+</li>
+<li><p><strong>FYI</strong></p>
+<p>Information dissemination messaging. Used to deliver information and receive notification that recipient has read that message.</p>
+</li>
+<li><p><strong>FCFS</strong></p>
+<p>Task/Action messaging. Used to find one or more participants from a larger group who are able/willing to act on the information in the original message.</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Message Pattern</th>
+<th>Originator Action Choices</th>
+<th>Recipient Action Choices</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard</td>
+<td>REPLY, FORWARD, CLOSE</td>
+<td>READ, REPLY, LEACE, FORWARD, DELEGATE</td>
+</tr>
+<tr>
+<td>FYI</td>
+<td>FORWARD, CLOSE</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>FCFS</td>
+<td>REPLY, FORWARD, CLOSE</td>
+<td>REPLY, ACCEPT, REJECT, FORWARD, DELEGATE</td>
+</tr>
+</tbody>
+</table>
+<h1>Example</h1><pre class="prettyprint source"><code>// instantiate the library and register event handlers
+var zyp = new Zyp();
+zyp.onNotification(userNotificationHandler);
+zyp.onMessageList(messageListHandler);
+zyp.onError(errorHandler);
+
+// login the user
+zyp.loginByEnterpriseToken(userId, enterpriseToken);
+
+// handle user notifications
+var userNotificationHandler = function(type, data, context){
+    switch (type) {
+        case 'login:enterpriseToken':
+            // once logged into an enterprise fetch its users
+            zyp.getEnterpriseUsers();
+            break;
+
+        case 'enterprise:users':
+            enterpriseUsers = data;
+            // having the enterprise user to zypId mapping fetch the users message list
+            zyp.getMessageList();
+            break;
+    }
+};
+
+var messageListHandler = function(data, context) {
+    // process the message list
+    messageList = data;
+    ...
+}
+
+var errorHandler = function(type, data, context) {
+    // handle error messages
+    ...
+}</code></pre><h1>Create and Update a message</h1><pre class="prettyprint source"><code>// send a new message
+var message = {
+    pattern = 'STANDARD',
+    members = ['enterpriseId1', 'enterpriseId2', 'zypHubId1'],   // can mix enterprise and zyphubId's to address users
+    content = 'this is a message, enjoy it please'
+}
+
+zyp.newMessage(msg);
+
+// handle user notifications
+var userNotificationHandler = function(type, data, context){
+    switch (type) {
+        ...
+
+        case 'message:new':
+            newMessageId = data
+            break;
+    }
+};
+
+// reply to an existing message
+
+// get the ZypHub message
+var msg = messageList[selectedIndex];
+
+msg.update('REPLY', 'I am replying to this message');</code></pre></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated at Mon Jan 30 2017 13:18:57 GMT-0600 (CST)
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
